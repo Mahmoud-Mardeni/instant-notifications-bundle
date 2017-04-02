@@ -1,0 +1,19 @@
+instant_notification_index:
+    path:     /
+    defaults: { _controller: InstantNotificationBundle:Default:index }
+    methods: [GET]
+
+instant_notification_fetch:
+    path:     /fetch
+    defaults: { _controller: InstantNotificationBundle:Default:fetch }
+    methods: [POST]
+
+instant_notification_set_read:
+    path:     /setRead
+    defaults: { _controller: InstantNotificationBundle:Default:setRead }
+    methods: [POST]
+
+instant_notification_set_seen:
+    path:     /setSeen
+    defaults: { _controller: InstantNotificationBundle:Default:setAllSeen }
+    methods: [POST]

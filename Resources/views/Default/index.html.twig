@@ -1,0 +1,116 @@
+{% extends "inner-base.html.twig" %}
+
+{% block styles %}
+    <link rel="stylesheet" type="text/css"
+          href="{{ asset('bundles/core/javascript/datatable/jquery.dataTables.min.css') }}">
+
+    <style type="text/css">
+        #notifications {
+            width: 772px;
+            height: 350px;
+            overflow-x: hidden;
+            text-align: center;
+            list-style: none;
+        }
+
+    </style>
+{% endblock %}
+
+{% block inner_content %}
+    <table id="notifications" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th>إشعاراتــك</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+{% endblock %}
+
+    {% block scripts %}
+        <script src="{{ asset('bundles/core/javascript/datatable/jquery.dataTables.min.js') }}"></script>
+        <script src="{{ asset('bundles/core/javascript/datatable/config.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('public/bower_components/jsviews/jsrender.min.js') }}"></script>
+        <script type="text/javascript">
+            jQuery(document).ready(function () {
+                $.views.settings.delimiters("<%", "%>");
+                var notifications = JSON.parse('{{ notifications|raw }}');
+                $.post(Routing.generate('instant_notification_set_seen'), function (result) {
+                });
+                $("table#notifications tbody").append($("#notification-template").render(notifications));
+                $('#notification-badge').text('');
+                var table = $('table#notifications').DataTable({
+                    "deferRender": true,
+                    "order": false,
+                    language: datatable_i18n,
+                    drawCallback: function (settings) {
+                        $('.timeago').timeago();
+                    }
+                });
+                $('tr.notification-item').click(function (e) {
+                    var id = $(this).attr('id');
+                    id = id.split('_')[1];
+                    var url = $(this).attr('href');
+                    var status = $(this).data('status');
+                    setRead(id, url, status)
+                });
+            });
+            function setRead(notificationId, url, status) {
+                if (status != "2") {
+                    $.ajax({
+                        type: 'POST',
+                        data: {id: notificationId},
+                        url: Routing.generate('instant_notification_set_read'),
+                        global: false
+                    })
+                            .done(function (result) {
+                                if (!result.success) {
+                                    console.log(result.error);
+                                }else{
+                                    $('#notification_'+notificationId).removeClass('unread');
+                                }
+                            })
+                            .fail(function (jqXhr) {
+                                console.log('failed to register');
+                            });
+                }
+                if(url) {
+                    window.location = url;
+                }
+            }
+        </script>
+        <script type="text/x-jsrender" id="notification-template">
+
+         <tr role="presentation" id="notification_<%: id %>" data-status="<%: status %>"  class="notification-item infinite-list-item <%if status !=2%>unread<%/if%>" href="<%: url %>">
+         <td>
+                <a role="menuitem" tabindex="-1" href="#" style="padding:25px 0 !important;">
+                    <div class="rubix-grid container-fluid">
+                        <div class="row">
+                            <div class="col-xs-2 avatar-container">
+                                <div>
+                                    <img src="<%: picturePath %>" width="40" height="40">
+                                </div>
+                            </div>
+                            <div class="col-xs-10 text-left notification-container" style="padding-right:15px;">
+                                <div class="time">
+                                    <strong class="fg-darkgray">
+                                        <span class="rubix-icon fontello icon-fontello-chat-5">
+                                         </span>
+                                        <time class="timeago notification-time" datetime="<%: createdAt %>"></time>
+                                    </strong>
+                                </div>
+                                <div class="notification-message">
+                                    <span>
+                                    <%: message %>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                </td>
+            </tr>
+
+        </script>
+
+    {% endblock %}

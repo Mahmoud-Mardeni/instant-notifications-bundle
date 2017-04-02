@@ -1,0 +1,15 @@
+services:
+#    instant_notification.example:
+#        class: Notification\InstantNotificationBundle\Example
+#        arguments: ["@service_id", "plain_value", %parameter%]
+  notification.instant_notification.factory:
+    class: Notification\InstantNotificationBundle\Factory\Factory
+    arguments: ['@rsmq.rest.queue_api','@rsmq.rest.message_api','@doctrine.orm.entity_manager']
+
+  notification.instant_notification.api:
+    class: Notification\InstantNotificationBundle\Services\NotificationAPI
+    arguments: ['@notification.instant_notification.factory','@doctrine.orm.entity_manager','%notification.instant_notification.status%']
+
+  notification.instant_notification.authenticator:
+    class: Notification\InstantNotificationBundle\Services\Authenticator
+    arguments: ['@guzzle.client.rsmq_worker_api']

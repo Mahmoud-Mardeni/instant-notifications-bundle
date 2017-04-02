@@ -1,0 +1,5 @@
+parameters:
+  notification.instant_notification.status:
+    not_seen: 0
+    seen: 1
+    seen_and_read: 2
